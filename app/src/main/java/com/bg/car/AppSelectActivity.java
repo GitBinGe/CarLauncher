@@ -3,6 +3,7 @@ package com.bg.car;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
+import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -36,6 +37,14 @@ public class AppSelectActivity extends AppCompatActivity {
             for (int i = 0; i < infos.size(); i++) {
                 PackageInfo packageInfo = infos.get(i);
                 if (packageInfo.applicationInfo.loadIcon(getPackageManager()) == null) {
+                    continue;
+                }
+                Intent resolveIntent = new Intent(Intent.ACTION_MAIN, null);
+                resolveIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+                resolveIntent.setPackage(packageInfo.packageName);
+                List<ResolveInfo> list = getPackageManager()
+                        .queryIntentActivities(resolveIntent, 0);
+                if (list.size() == 0) {
                     continue;
                 }
                 appList.add(packageInfo);
@@ -79,12 +88,16 @@ public class AppSelectActivity extends AppCompatActivity {
                 PackageInfo info = appList.get(i);
                 String packageName = info.packageName;
                 int id = getIntent().getIntExtra("id", 0);
-
-                Intent intent = new Intent();
-                intent.putExtra("id", id);
-                intent.putExtra("package_name", packageName);
-                setResult(Activity.RESULT_OK, intent);
-                finish();
+                if (id > 0) {
+                    Intent intent = new Intent();
+                    intent.putExtra("id", id);
+                    intent.putExtra("package_name", packageName);
+                    setResult(Activity.RESULT_OK, intent);
+                    finish();
+                } else {
+                    Util.startApp(AppSelectActivity.this, packageName);
+                    finish();
+                }
             }
         });
 

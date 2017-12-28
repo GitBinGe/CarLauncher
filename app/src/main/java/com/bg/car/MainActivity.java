@@ -25,11 +25,14 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        initView(R.id.navigation, R.mipmap.maps, "导航");
-        initView(R.id.music, R.mipmap.player, "音乐");
-        initView(R.id.radio, R.mipmap.fmradio, "FM");
-        initView(R.id.setting, R.mipmap.settings, "设置");
-
+        initView(R.id.navigation, R.mipmap.icon_maps, "Maps");
+        initView(R.id.music, R.mipmap.icon_music, "Music");
+        initView(R.id.radio, R.mipmap.icon_fm, "FM");
+        initView(R.id.setting, R.mipmap.icon_app, "Apps");
+        View view = findViewById(R.id.setting);
+        view.setOnClickListener(this);
+        view.setOnLongClickListener(null);
+        view.setTag(null);
     }
 
     private void initView(int id, int icon, String name) {
@@ -47,51 +50,17 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
 
     @Override
     public void onClick(View view) {
-        if (view.getTag() != null) {
-            doStartApplicationWithPackageName(view.getTag().toString());
+
+        if (view.getTag() != null && Util.startApp(this, view.getTag().toString())) {
+
+        } else if (view.getId() == R.id.setting) {
+            Intent intent = new Intent(this, AppSelectActivity.class);
+            startActivity(intent);
+            overridePendingTransition(0, 0);
         } else {
             Prompt.show(this, "请长按选择APP");
         }
     }
-
-    private void doStartApplicationWithPackageName(String packageName) {
-
-        // 通过包名获取此APP详细信息，包括Activities、services、versioncode、name等等
-        PackageInfo packageinfo = null;
-        try {
-            packageinfo = getPackageManager().getPackageInfo(packageName, 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        if (packageinfo == null) {
-            return;
-        }
-
-        // 创建一个类别为CATEGORY_LAUNCHER的该包名的Intent
-        Intent resolveIntent = new Intent(Intent.ACTION_MAIN, null);
-        resolveIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        resolveIntent.setPackage(packageinfo.packageName);
-
-        // 通过getPackageManager()的queryIntentActivities方法遍历
-        List<ResolveInfo> resolveinfoList = getPackageManager()
-                .queryIntentActivities(resolveIntent, 0);
-
-        ResolveInfo resolveinfo = resolveinfoList.iterator().next();
-        if (resolveinfo != null) {
-            // 这个就是我们要找的该APP的LAUNCHER的Activity[组织形式：packagename.mainActivityname]
-            String className = resolveinfo.activityInfo.name;
-            // LAUNCHER Intent
-            Intent intent = new Intent(Intent.ACTION_MAIN);
-            intent.addCategory(Intent.CATEGORY_LAUNCHER);
-
-            // 设置ComponentName参数1:packagename参数2:MainActivity路径
-            ComponentName cn = new ComponentName(packageName, className);
-
-            intent.setComponent(cn);
-            startActivity(intent);
-        }
-    }
-
     @Override
     public boolean onLongClick(View view) {
         Intent intent = new Intent(this, AppSelectActivity.class);
@@ -110,6 +79,9 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
                 Saver.set("" + id, packageName);
             }
             LogUtils.d(packageName + ":" + id);
+
+            View view = findViewById(id);
+            view.setTag(packageName);
         }
     }
 }
