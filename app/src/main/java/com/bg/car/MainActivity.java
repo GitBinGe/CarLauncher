@@ -104,6 +104,12 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT, 1);
             vg.addView(iv, params);
+            iv.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Util.startApp(MainActivity.this, view.getTag().toString());
+                }
+            });
         }
     }
 
