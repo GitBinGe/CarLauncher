@@ -25,10 +25,10 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        initView(R.id.navigation, R.mipmap.icon_maps, "Maps");
-        initView(R.id.music, R.mipmap.icon_music, "Music");
+        initView(R.id.navigation, R.mipmap.icon_maps, "MAP");
+        initView(R.id.music, R.mipmap.icon_music, "MUSIC");
         initView(R.id.radio, R.mipmap.icon_fm, "FM");
-        initView(R.id.setting, R.mipmap.icon_app, "Apps");
+        initView(R.id.setting, R.mipmap.icon_app, "APP");
         View view = findViewById(R.id.setting);
         view.setOnClickListener(this);
         view.setOnLongClickListener(null);
@@ -73,15 +73,15 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK) {
-            int id = data.getIntExtra("id", 0);
-            String packageName = data.getStringExtra("package_name");
-            if (id > 0 && packageName != null) {
-                Saver.set("" + id, packageName);
+            if (requestCode == 0) {
+                int id = data.getIntExtra("id", 0);
+                String packageName = data.getStringExtra("package_name");
+                if (id > 0 && packageName != null) {
+                    Saver.set("" + id, packageName);
+                    View view = findViewById(id);
+                    view.setTag(packageName);
+                }
             }
-            LogUtils.d(packageName + ":" + id);
-
-            View view = findViewById(id);
-            view.setTag(packageName);
         }
     }
 }
