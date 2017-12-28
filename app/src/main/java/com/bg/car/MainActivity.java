@@ -6,16 +6,29 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Color;
+import android.media.RemoteControlClient;
+import android.media.RemoteController;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bg.library.Base.os.SystemInfo;
+import com.bg.library.UI.Dialog.ActionSheet;
 import com.bg.library.UI.Dialog.Prompt;
 import com.bg.library.Utils.Localize.Saver;
 import com.bg.library.Utils.Log.LogUtils;
 
+import org.w3c.dom.Text;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnLongClickListener, View.OnClickListener {
@@ -25,6 +38,17 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        findViewById(R.id.root).setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                Intent intent = new Intent(MainActivity.this, AppSelectActivity.class);
+                intent.putExtra("id", 999);
+                startActivityForResult(intent, 1);
+                overridePendingTransition(0, 0);
+                return true;
+            }
+        });
+
         initView(R.id.navigation, R.mipmap.icon_maps, "MAP");
         initView(R.id.music, R.mipmap.icon_music, "MUSIC");
         initView(R.id.radio, R.mipmap.icon_fm, "FM");
@@ -33,6 +57,10 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         view.setOnClickListener(this);
         view.setOnLongClickListener(null);
         view.setTag(null);
+
+        initShortcut();
+
+        initMediaButtons();
     }
 
     private void initView(int id, int icon, String name) {
@@ -48,6 +76,50 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         tv.setText(name);
     }
 
+    private void initShortcut() {
+        LinearLayout vg = (LinearLayout) findViewById(R.id.apps);
+        vg.removeAllViews();
+
+        String[] apps = Saver.getString("apps", "").split(",");
+        List<String> appList = new ArrayList<>();
+        if (apps != null && apps.length > 0) {
+            for (int i = 0; i < apps.length; i++) {
+                String packageName = apps[i];
+                if (!TextUtils.isEmpty(packageName)) {
+                    appList.add(packageName);
+                }
+            }
+        }
+
+        if (appList.size() > 4) {
+            appList = appList.subList(0, 4);
+        }
+        int padding = SystemInfo.Screen.dip2px(30);
+        for (String packageName : appList) {
+            ImageView iv = new ImageView(this);
+            iv.setPadding(padding, padding, padding, padding);
+            iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            iv.setTag(packageName);
+            iv.setImageDrawable(Util.getAppIcon(this, packageName));
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT, 1);
+            vg.addView(iv, params);
+        }
+    }
+
+    private void initMediaButtons() {
+        findViewById(R.id.next).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+    }
+
+    public boolean sendMusicKeyEvent(int keyCode) {
+        return false;
+    }
+
     @Override
     public void onClick(View view) {
 
@@ -61,6 +133,7 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
             Prompt.show(this, "请长按选择APP");
         }
     }
+
     @Override
     public boolean onLongClick(View view) {
         Intent intent = new Intent(this, AppSelectActivity.class);
@@ -81,6 +154,15 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
                     View view = findViewById(id);
                     view.setTag(packageName);
                 }
+            } else if (requestCode == 1) {
+                StringBuffer apps = new StringBuffer(Saver.getString("apps", ""));
+                String packageName = data.getStringExtra("package_name");
+                if (!apps.toString().contains(packageName)) {
+                    apps.append("," + packageName);
+                    Saver.set("apps", apps);
+                    LogUtils.d("apps : " + apps);
+                }
+                initShortcut();
             }
         }
     }

@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.drawable.Drawable;
 
 import java.util.List;
 
@@ -59,4 +61,15 @@ public class Util {
         return false;
     }
 
+    public static Drawable getAppIcon(Context context, String packageName) {
+        try {
+            ApplicationInfo info = context.getPackageManager().getApplicationInfo(packageName, 0);
+            return info.loadIcon(context.getPackageManager());
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }
+
