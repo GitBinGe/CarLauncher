@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         if (appList.size() > 4) {
             appList = appList.subList(0, 4);
         }
-        int padding = SystemInfo.Screen.dip2px(30);
+        int padding = SystemInfo.Screen.dip2px(15);
         for (String packageName : appList) {
             ImageView iv = new ImageView(this);
             iv.setPadding(padding, padding, padding, padding);
