@@ -10,6 +10,20 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+    signingConfigs {
+        facility {
+            keyAlias 'bin'
+            keyPassword 'bin720097'
+            storeFile file('./bin.keystore')
+            storePassword 'bin720097'
+        }
+        debug {
+            keyAlias 'bin'
+            keyPassword 'bin720097'
+            storeFile file('./bin.keystore')
+            storePassword 'bin720097'
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
