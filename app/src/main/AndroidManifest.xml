@@ -27,6 +27,9 @@
         <activity android:name=".AppSelectActivity"
             android:screenOrientation="landscape">
         </activity>
+        <activity android:name=".IconSelectActivity"
+            android:screenOrientation="landscape">
+        </activity>
     </application>
 
 </manifest>

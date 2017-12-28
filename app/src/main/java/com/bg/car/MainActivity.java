@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.RemoteControlClient;
 import android.media.RemoteController;
@@ -28,6 +29,7 @@ import com.bg.library.Utils.Log.LogUtils;
 
 import org.w3c.dom.Text;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,20 +96,42 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         if (appList.size() > 4) {
             appList = appList.subList(0, 4);
         }
-        int padding = SystemInfo.Screen.dip2px(15);
+        int padding = SystemInfo.Screen.dip2px(30);
         for (String packageName : appList) {
             ImageView iv = new ImageView(this);
-            iv.setPadding(padding, padding, padding, padding);
+            iv.setBackgroundResource(R.drawable.item_selector);
+//            iv.setBackgroundColor(Color.RED);
+            iv.setPadding(padding, padding / 3, padding, padding / 3);
             iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
             iv.setTag(packageName);
-            iv.setImageDrawable(Util.getAppIcon(this, packageName));
+            String path = Saver.getString(packageName, null);
+            if (path != null) {
+                try {
+                    iv.setImageBitmap(BitmapFactory.decodeStream(getAssets().open(path)));
+                } catch (IOException e) {
+                    iv.setImageDrawable(Util.getAppIcon(this, packageName));
+                }
+            } else {
+                iv.setImageDrawable(Util.getAppIcon(this, packageName));
+            }
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT, 1);
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 1);
             vg.addView(iv, params);
+//            params.rightMargin = padding;
             iv.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Util.startApp(MainActivity.this, view.getTag().toString());
+                }
+            });
+            iv.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    Intent intent = new Intent(MainActivity.this, IconSelectActivity.class);
+                    intent.putExtra("package_name", view.getTag().toString());
+                    startActivityForResult(intent, 2);
+                    overridePendingTransition(0, 0);
+                    return true;
                 }
             });
         }
@@ -168,6 +192,11 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
                     Saver.set("apps", apps);
                     LogUtils.d("apps : " + apps);
                 }
+                initShortcut();
+            } else if (requestCode == 2) {
+                String packageName = data.getStringExtra("package_name");
+                String path = data.getStringExtra("icon");
+                Saver.set(packageName, path);
                 initShortcut();
             }
         }
