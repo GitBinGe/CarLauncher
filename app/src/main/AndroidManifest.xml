@@ -36,6 +36,7 @@
                 <action android:name="car.IconSelectActivity" />
             </intent-filter>
         </activity>
+        <service android:name=".TimeService"/>
     </application>
 
 </manifest>

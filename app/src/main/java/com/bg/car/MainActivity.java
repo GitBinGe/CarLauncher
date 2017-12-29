@@ -3,6 +3,7 @@ package com.bg.car;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -10,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.RemoteControlClient;
 import android.media.RemoteController;
+import android.os.IBinder;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -32,10 +34,12 @@ import com.bg.library.Utils.Log.LogUtils;
 import org.w3c.dom.Text;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements View.OnLongClickListener, View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnLongClickListener, View.OnClickListener, ServiceConnection, TimeService.DateCallback {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,8 +76,14 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         view.setTag(null);
 
         initShortcut();
+    }
 
-        initMediaButtons();
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Intent intent = new Intent(this, TimeService.class);
+        bindService(intent, this, BIND_AUTO_CREATE);
+        onDateChange();
     }
 
     private void initView(int id, int icon, String name) {
@@ -161,19 +171,6 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         }
     }
 
-    private void initMediaButtons() {
-        findViewById(R.id.next).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
-    }
-
-    public boolean sendMusicKeyEvent(int keyCode) {
-        return false;
-    }
-
     @Override
     public void onClick(View view) {
 
@@ -220,5 +217,32 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
                 initShortcut();
             }
         }
+    }
+
+    @Override
+    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+        LogUtils.d("TimeService:连接成功");
+        TimeService.Binder binder = (TimeService.Binder) iBinder;
+        TimeService service = binder.getService();
+        service.setDateCallback(this);
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName componentName) {
+
+    }
+
+    private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd E");
+
+    @Override
+    public void onDateChange() {
+        LogUtils.d("TimeService:刷新时间");
+
+        TextView time = (TextView) findViewById(R.id.time);
+        time.setText(timeFormat.format(new Date()));
+
+        TextView date = (TextView) findViewById(R.id.date);
+        date.setText(dateFormat.format(new Date()));
     }
 }
