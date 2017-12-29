@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
             }
         });
 
-        initView(R.id.navigation, R.mipmap.icon_maps, "MAP");
+        initView(R.id.navigation, R.mipmap.icon_map, "MAP");
         initView(R.id.music, R.mipmap.icon_music, "MUSIC");
         initView(R.id.radio, R.mipmap.icon_fm, "FM");
         initView(R.id.setting, R.mipmap.icon_app, "APP");
@@ -244,5 +244,13 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
 
         TextView date = (TextView) findViewById(R.id.date);
         date.setText(dateFormat.format(new Date()));
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
     }
 }
