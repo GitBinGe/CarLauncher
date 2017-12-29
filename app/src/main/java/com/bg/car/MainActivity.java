@@ -44,6 +44,23 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
 
         ViewPager bg = (ViewPager) findViewById(R.id.bgs);
         bg.setAdapter(new BGAdapter(this));
+        bg.setCurrentItem(Saver.getInteger("current_page", 0), false);
+        bg.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                Saver.set("current_page", position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
 
         findViewById(R.id.root).setOnLongClickListener(new View.OnLongClickListener() {
             @Override
