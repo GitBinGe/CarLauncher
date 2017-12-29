@@ -26,6 +26,9 @@
 
         <activity android:name=".AppSelectActivity"
             android:screenOrientation="landscape">
+            <intent-filter>
+                <action android:name="car.AppSelectActivity" />
+            </intent-filter>
         </activity>
         <activity android:name=".IconSelectActivity"
             android:screenOrientation="landscape">
