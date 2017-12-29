@@ -62,7 +62,7 @@ public class BGAdapter extends PagerAdapter {
     public Object instantiateItem(ViewGroup container, int position) {
         String path = list.get(position);
         ImageView iv = new ImageView(container.getContext());
-        iv.setScaleType(ImageView.ScaleType.CENTER);
+        iv.setScaleType(ImageView.ScaleType.CENTER_CROP);
         iv.setTag(path);
         container.addView(iv);
 

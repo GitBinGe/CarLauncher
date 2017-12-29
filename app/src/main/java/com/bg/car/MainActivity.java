@@ -62,17 +62,6 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
             }
         });
 
-        findViewById(R.id.root).setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                Intent intent = new Intent(MainActivity.this, AppSelectActivity.class);
-                intent.putExtra("id", 999);
-                startActivityForResult(intent, 1);
-                overridePendingTransition(0, 0);
-                return true;
-            }
-        });
-
         initView(R.id.navigation, R.mipmap.icon_maps, "MAP");
         initView(R.id.music, R.mipmap.icon_music, "MUSIC");
         initView(R.id.radio, R.mipmap.icon_fm, "FM");
@@ -102,60 +91,73 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
 
     private void initShortcut() {
         LinearLayout vg = (LinearLayout) findViewById(R.id.apps);
-        vg.removeAllViews();
+        for (int i = 0; i < 4; i++) {
+            LinearLayout item = (LinearLayout) vg.getChildAt(i);
+            ImageView iv = item.findViewById(R.id.image);
+            TextView tv = item.findViewById(R.id.text);
 
-        String[] apps = Saver.getString("apps", "").split(",");
-        List<String> appList = new ArrayList<>();
-        if (apps != null && apps.length > 0) {
-            for (int i = 0; i < apps.length; i++) {
-                String packageName = apps[i];
-                if (!TextUtils.isEmpty(packageName)) {
-                    appList.add(packageName);
-                }
-            }
-        }
-
-        if (appList.size() > 4) {
-            appList = appList.subList(0, 4);
-        }
-        int padding = SystemInfo.Screen.dip2px(30);
-        for (String packageName : appList) {
-            ImageView iv = new ImageView(this);
-            iv.setBackgroundResource(R.drawable.item_selector);
-//            iv.setBackgroundColor(Color.RED);
-            iv.setPadding(padding, padding / 3, padding, padding / 3);
-            iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            iv.setTag(packageName);
-            String path = Saver.getString(packageName, null);
-            if (path != null) {
-                try {
-                    iv.setImageBitmap(BitmapFactory.decodeStream(getAssets().open(path)));
-                } catch (IOException e) {
+            final int index = i + 1;
+            String packageName = Saver.getString("shortcut_" + index, null);
+            if (TextUtils.isEmpty(packageName)) {
+                iv.setImageBitmap(null);
+                tv.setText("");
+                item.setTag(null);
+                item.setOnClickListener(null);
+                item.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View view) {
+                        Intent intent = new Intent(MainActivity.this, AppSelectActivity.class);
+                        intent.putExtra("id", index);
+                        startActivityForResult(intent, 1);
+                        overridePendingTransition(0, 0);
+                        return true;
+                    }
+                });
+            } else {
+                tv.setText(Util.getAppName(this, packageName));
+                item.setTag(packageName);
+                String path = Saver.getString(packageName, null);
+                if (path != null) {
+                    try {
+                        iv.setImageBitmap(BitmapFactory.decodeStream(getAssets().open(path)));
+                    } catch (IOException e) {
+                        iv.setImageDrawable(Util.getAppIcon(this, packageName));
+                    }
+                } else {
                     iv.setImageDrawable(Util.getAppIcon(this, packageName));
                 }
-            } else {
-                iv.setImageDrawable(Util.getAppIcon(this, packageName));
+                item.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Util.startApp(MainActivity.this, view.getTag().toString());
+                    }
+                });
+                item.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(final View view) {
+
+                        ActionSheet as = new ActionSheet(view.getContext());
+                        as.addItem("修改图标");
+                        as.addItem("删除应用");
+                        as.show();
+                        as.setOnItemClickListener(new ActionSheet.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(int i) {
+                                if (i == 0) {
+                                    Intent intent = new Intent(MainActivity.this, IconSelectActivity.class);
+                                    intent.putExtra("package_name", view.getTag().toString());
+                                    startActivityForResult(intent, 2);
+                                    overridePendingTransition(0, 0);
+                                } else {
+                                    Saver.set("shortcut_" + index, "");
+                                    initShortcut();
+                                }
+                            }
+                        });
+                        return true;
+                    }
+                });
             }
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 1);
-            vg.addView(iv, params);
-//            params.rightMargin = padding;
-            iv.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Util.startApp(MainActivity.this, view.getTag().toString());
-                }
-            });
-            iv.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    Intent intent = new Intent(MainActivity.this, IconSelectActivity.class);
-                    intent.putExtra("package_name", view.getTag().toString());
-                    startActivityForResult(intent, 2);
-                    overridePendingTransition(0, 0);
-                    return true;
-                }
-            });
         }
     }
 
@@ -207,13 +209,9 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
                     view.setTag(packageName);
                 }
             } else if (requestCode == 1) {
-                StringBuffer apps = new StringBuffer(Saver.getString("apps", ""));
                 String packageName = data.getStringExtra("package_name");
-                if (!apps.toString().contains(packageName)) {
-                    apps.append("," + packageName);
-                    Saver.set("apps", apps);
-                    LogUtils.d("apps : " + apps);
-                }
+                int id = data.getIntExtra("id", 0);
+                Saver.set("shortcut_" + id, packageName);
                 initShortcut();
             } else if (requestCode == 2) {
                 String packageName = data.getStringExtra("package_name");

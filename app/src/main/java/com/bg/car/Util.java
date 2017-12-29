@@ -71,5 +71,15 @@ public class Util {
         return null;
     }
 
+    public static CharSequence getAppName(Context context, String packageName) {
+        try {
+            ApplicationInfo info = context.getPackageManager().getApplicationInfo(packageName, 0);
+            return info.loadLabel(context.getPackageManager());
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }
 

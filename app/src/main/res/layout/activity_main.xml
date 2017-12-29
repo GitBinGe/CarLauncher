@@ -58,14 +58,21 @@
 
             <LinearLayout
                 android:id="@+id/apps"
-                android:paddingTop="20dp"
-                android:paddingBottom="20dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:paddingRight="30dp"
                 android:paddingLeft="30dp"
-                android:orientation="horizontal" />
+                android:orientation="horizontal" >
+
+                <include layout="@layout/shortcut_item"/>
+                <include layout="@layout/shortcut_item"/>
+                <include layout="@layout/shortcut_item"/>
+                <include layout="@layout/shortcut_item"/>
+
+            </LinearLayout>
 
             <View
                 android:layout_width="0.5dp"
