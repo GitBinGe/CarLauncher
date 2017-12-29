@@ -3,6 +3,7 @@ package com.bg.car;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -13,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -27,15 +29,12 @@ import java.util.Map;
 
 public class IconSelectActivity extends AppCompatActivity {
 
-    private Handler mHandler;
-    private Map<String, Bitmap> bitmaps = new HashMap<>();
     private List<String> icons = new ArrayList<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_icon_select);
-        mHandler = new Handler();
         try {
             String[] icons = getAssets().list("icon8");
             for (String name : icons) {
@@ -69,13 +68,23 @@ public class IconSelectActivity extends AppCompatActivity {
             @Override
             public View getView(int i, View view, ViewGroup viewGroup) {
                 if (view == null) {
-                    view = LayoutInflater.from(IconSelectActivity.this).inflate(R.layout.app_item, null);
+                    view = LayoutInflater.from(IconSelectActivity.this).inflate(R.layout.icon_item, null);
                 }
                 String info = icons.get(i);
-//                ImageView iv = view.findViewById(R.id.image);
-//                iv.setImageDrawable(getAssets().open());
+                ImageView iv = view.findViewById(R.id.image);
+
+                Bitmap bitmap = ImageCache.share().get(info);
+                if (bitmap == null) {
+                    try {
+                        bitmap = BitmapFactory.decodeStream(getAssets().open(info));
+                        ImageCache.share().put(info, bitmap);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                iv.setImageBitmap(bitmap);
                 TextView tv = view.findViewById(R.id.text);
-                tv.setText(info);
+                tv.setText(info.substring(info.indexOf("/")+1));
                 return view;
             }
         });

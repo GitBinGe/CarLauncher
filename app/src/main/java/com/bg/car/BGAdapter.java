@@ -19,24 +19,10 @@ import java.util.List;
 
 public class BGAdapter extends PagerAdapter {
 
-    private static LruCache<String, Bitmap> cache;
     private List<String> list;
 
     public BGAdapter(Context context) {
-
-        if (cache == null) {
-            int MaxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);// kB
-            int cacheSize = MaxMemory / 8;
-            cache = new LruCache<String, Bitmap>(cacheSize) {
-                @Override
-                protected int sizeOf(String key, Bitmap bitmap) {
-                    return bitmap.getRowBytes() * bitmap.getHeight() / 1024;// KB
-                }
-            };
-        }
-
         list = new ArrayList<>();
-
         try {
             String[] names = context.getAssets().list("bg");
             for (int i = 0; i < names.length; i++) {
@@ -66,11 +52,11 @@ public class BGAdapter extends PagerAdapter {
         iv.setTag(path);
         container.addView(iv);
 
-        Bitmap bitmap = cache.get(path);
+        Bitmap bitmap = ImageCache.share().get(path);
         if (bitmap == null) {
             try {
                 bitmap = BitmapFactory.decodeStream(container.getContext().getAssets().open(path));
-                cache.put(path, bitmap);
+                ImageCache.share().put(path, bitmap);
             } catch (IOException e) {
 
             }
