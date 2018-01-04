@@ -72,8 +72,8 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
 
         initView(1001, 0xff48515a, R.id.navigation, R.mipmap.icon_map, "MAP");
         initView(1002, 0xffb3e1ee, R.id.music, R.mipmap.icon_music, "MUSIC");
-        initView(1003, 0xffffd55d, R.id.radio, R.mipmap.icon_fm, "FM");
-        initView(1004, 0xfff49070, R.id.setting, R.mipmap.icon_app, "APP");
+        initView(1003, 0xffffd55d, R.id.radio, R.mipmap.icon_radio, "FM");
+        initView(1004, 0xfff49070, R.id.setting, R.mipmap.icon_apps2, "APP");
         View view = findViewById(R.id.setting);
         view.setOnClickListener(this);
         view.setOnLongClickListener(null);
