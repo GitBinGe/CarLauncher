@@ -3,6 +3,7 @@ package com.bg.car;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.support.v4.view.PagerAdapter;
 import android.util.LruCache;
 import android.view.View;
@@ -23,6 +24,7 @@ public class BGAdapter extends PagerAdapter {
 
     public BGAdapter(Context context) {
         list = new ArrayList<>();
+//        list.add("#ff072a3a");
         try {
             String[] names = context.getAssets().list("bg");
             for (int i = 0; i < names.length; i++) {
@@ -52,16 +54,21 @@ public class BGAdapter extends PagerAdapter {
         iv.setTag(path);
         container.addView(iv);
 
-        Bitmap bitmap = ImageCache.share().get(path);
-        if (bitmap == null) {
-            try {
-                bitmap = BitmapFactory.decodeStream(container.getContext().getAssets().open(path));
-                ImageCache.share().put(path, bitmap);
-            } catch (IOException e) {
+        if (path.startsWith("#")) {
+            iv.setImageBitmap(null);
+            iv.setBackgroundColor(Color.parseColor(path));
+        } else {
+            Bitmap bitmap = ImageCache.share().get(path);
+            if (bitmap == null) {
+                try {
+                    bitmap = BitmapFactory.decodeStream(container.getContext().getAssets().open(path));
+                    ImageCache.share().put(path, bitmap);
+                } catch (IOException e) {
 
+                }
             }
+            iv.setImageBitmap(bitmap);
         }
-        iv.setImageBitmap(bitmap);
         return iv;
     }
 

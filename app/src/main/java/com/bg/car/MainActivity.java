@@ -37,9 +37,13 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements View.OnLongClickListener, View.OnClickListener, ServiceConnection, TimeService.DateCallback {
+
+    private Map<Integer, View> map = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,10 +70,10 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
             }
         });
 
-        initView(R.id.navigation, R.mipmap.icon_map, "MAP");
-        initView(R.id.music, R.mipmap.icon_music, "MUSIC");
-        initView(R.id.radio, R.mipmap.icon_fm, "FM");
-        initView(R.id.setting, R.mipmap.icon_app, "APP");
+        initView(1001, 0xff48515a, R.id.navigation, R.mipmap.icon_map, "MAP");
+        initView(1002, 0xffb3e1ee, R.id.music, R.mipmap.icon_music, "MUSIC");
+        initView(1003, 0xffffd55d, R.id.radio, R.mipmap.icon_fm, "FM");
+        initView(1004, 0xfff49070, R.id.setting, R.mipmap.icon_app, "APP");
         View view = findViewById(R.id.setting);
         view.setOnClickListener(this);
         view.setOnLongClickListener(null);
@@ -86,14 +90,26 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
         onDateChange();
     }
 
-    private void initView(int id, int icon, String name) {
+    private void initView(final int appid, int background, int id, int icon, String name) {
         View view = findViewById(id);
         view.setOnClickListener(this);
-        view.setOnLongClickListener(this);
-        String packageName = Saver.getString("" + id, null);
+        String appId = appid + "";
+        String packageName = Saver.getString(appId, null);
         view.setTag(packageName);
+        map.put(appid, view);
+        view.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                Intent intent = new Intent(MainActivity.this, AppSelectActivity.class);
+                intent.putExtra("id", appid);
+                startActivityForResult(intent, 0);
+                overridePendingTransition(0, 0);
+                return true;
+            }
+        });
 
         ImageView iv = view.findViewById(R.id.image);
+        view.setBackgroundColor(0xffffffff & background);
         iv.setImageResource(icon);
         TextView tv = view.findViewById(R.id.text);
         tv.setText(name);
@@ -202,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements View.OnLongClickL
                 String packageName = data.getStringExtra("package_name");
                 if (id > 0 && packageName != null) {
                     Saver.set("" + id, packageName);
-                    View view = findViewById(id);
+                    View view = map.get(id);
                     view.setTag(packageName);
                 }
             } else if (requestCode == 1) {
