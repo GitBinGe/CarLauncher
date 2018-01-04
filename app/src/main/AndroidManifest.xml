@@ -9,9 +9,9 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        >
-        <activity android:name=".MainActivity"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".MainActivity"
             android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -19,24 +19,28 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".AppSelectActivity"
+        <activity
+            android:name=".AppSelectActivity"
             android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="car.AppSelectActivity" />
             </intent-filter>
         </activity>
-        <activity android:name=".IconSelectActivity"
+        <activity
+            android:name=".IconSelectActivity"
             android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="car.IconSelectActivity" />
             </intent-filter>
         </activity>
-        <service android:name=".TimeService"/>
+
+        <service android:name=".TimeService" />
     </application>
 
 </manifest>
