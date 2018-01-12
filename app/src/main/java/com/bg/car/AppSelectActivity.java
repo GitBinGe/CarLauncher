@@ -1,7 +1,10 @@
 package com.bg.car;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
@@ -18,6 +21,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bg.library.UI.Dialog.Progress;
+import com.bg.library.UI.View.TitleView;
+import com.bg.library.Utils.Log.LogUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,29 +31,34 @@ import java.util.List;
  * Created by BinGe on 2017/12/28.
  */
 
-public class AppSelectActivity extends AppCompatActivity {
+public class AppSelectActivity extends AppCompatActivity implements AppBroadcast.AppListener{
 
     private Handler mHandler;
-    private static List<PackageInfo> mApps = new ArrayList<>();
+
 
     @Override
+
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_select);
+
+        TitleView titleView = (TitleView) findViewById(R.id.title);
+        titleView.setUnit(TitleView.Unit.BACK | TitleView.Unit.TEXT);
+        titleView.setTitle("APP SELECT");
+
         mHandler = new Handler();
         Progress.show(this);
+        AppBroadcast.setListener(this);
 
-        if (mApps.size() > 0) {
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    initApps();
-                    Progress.dismiss();
-                }
-            }, 10);
-            return;
+        if (AppBroadcast.getApps().size() > 0) {
+            initApps();
+            Progress.dismiss();
+        } else {
+            refresh();
         }
+    }
 
+    private void refresh() {
         new Thread() {
             public void run() {
                 final List<PackageInfo> appList = new ArrayList<>();
@@ -71,9 +81,7 @@ public class AppSelectActivity extends AppCompatActivity {
                     }
                 } catch (Exception e) {
                 }
-                mApps.clear();
-                mApps.addAll(appList);
-
+                AppBroadcast.setApps(appList);
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -91,7 +99,7 @@ public class AppSelectActivity extends AppCompatActivity {
         gv.setAdapter(new BaseAdapter() {
             @Override
             public int getCount() {
-                return mApps.size();
+                return AppBroadcast.getApps().size();
             }
 
             @Override
@@ -109,7 +117,7 @@ public class AppSelectActivity extends AppCompatActivity {
                 if (view == null) {
                     view = LayoutInflater.from(AppSelectActivity.this).inflate(R.layout.app_item, null);
                 }
-                PackageInfo info = mApps.get(i);
+                PackageInfo info = AppBroadcast.getApps().get(i);
                 ImageView iv = view.findViewById(R.id.image);
                 iv.setImageDrawable(info.applicationInfo.loadIcon(getPackageManager()));
                 TextView tv = view.findViewById(R.id.text);
@@ -120,7 +128,7 @@ public class AppSelectActivity extends AppCompatActivity {
         gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                PackageInfo info = mApps.get(i);
+                PackageInfo info = AppBroadcast.getApps().get(i);
                 String packageName = info.packageName;
                 int id = getIntent().getIntExtra("id", 0);
                 if (id > 0) {
@@ -137,4 +145,14 @@ public class AppSelectActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void appListChange() {
+        refresh();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        AppBroadcast.setListener(null);
+    }
 }
